@@ -13,11 +13,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+interface ContextParams {
+    params: {
+        id: string;
+    }
+}
+
+
 
 // API DELETE: Hapus item (HANYA ADMIN)
 export async function DELETE(
     req: NextRequest, 
-    context: { params: { id: string } }
+    context:    ContextParams
 ) {
     // --- LAPISAN KEAMANAN SECRET TOKEN ---
     const requestToken = req.headers.get('X-Admin-Token');
@@ -32,8 +39,7 @@ export async function DELETE(
 
     await connectMongo();
     
-    const { params } = context as { params: { id: string } };
-    const itemId = params.id;
+    const itemId = context.params.id; 
     
     try {
         // 1. Ambil data produk untuk mendapatkan public ID
