@@ -8,6 +8,20 @@ import UploadModal from '../src/components/UploadModal';
 import GalleryCard from '../src/components/GalleryCard';
 import DetailModal from '../src/components/DetailModal';
 
+// -------------------------------------------------------------------
+// START: METADATA
+// Ini akan mengubah judul browser dan pratinjau link saat dibagikan
+// -------------------------------------------------------------------
+export const metadata = {
+  // Judul utama yang muncul di browser tab dan di pratinjau link
+  title: 'Rasy Public Gallery - Share Your Photos Here',
+  // Deskripsi yang muncul di bawah judul saat link dibagikan
+  description: 'Tempat berbagi dan mengunduh foto-foto keren menggunakan Next.js, Cloudinary, dan MongoDB.',
+};
+// -------------------------------------------------------------------
+// END: METADATA
+// -------------------------------------------------------------------
+
 interface GalleryItem {
     _id: string;
     title: string;
