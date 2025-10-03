@@ -1,30 +1,25 @@
 // app/api/gallery/[id]/route.ts
+
 import connectMongo from '../../../../lib/mongodb';
 import GalleryItem from '../../../../models/GalleryItem';
 import { NextResponse, NextRequest } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
+import { Document } from 'mongoose'; // Tambahkan ini jika IGalleryItem butuh impor (biasanya tidak perlu di route file)
 
 const ADMIN_TOKEN = process.env.ADMIN_SECRET_TOKEN;
 
-// Konfigurasi Cloudinary untuk menghapus
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-interface ContextParams {
-    params: {
-        id: string;
-    }
-}
+// Definisi type context yang paling umum dan kompatibel dengan Next.js App Router
+type RouteContext = { params: { id: string } };
 
-
-
-// API DELETE: Hapus item (HANYA ADMIN)
 export async function DELETE(
     req: NextRequest, 
-    context:    ContextParams
+    context: RouteContext // Menggunakan type eksplisit untuk menghindari Type Error saat build
 ) {
     // --- LAPISAN KEAMANAN SECRET TOKEN ---
     const requestToken = req.headers.get('X-Admin-Token');
@@ -39,24 +34,24 @@ export async function DELETE(
 
     await connectMongo();
     
+    // Ambil ID dari params
     const itemId = context.params.id; 
     
     try {
-        // 1. Ambil data produk untuk mendapatkan public ID
         const itemToDelete = await GalleryItem.findById(itemId);
 
         if (!itemToDelete) {
             return NextResponse.json({ success: false, message: 'Item galeri tidak ditemukan.' }, { status: 404 });
         }
 
-        // 2. HAPUS GAMBAR DARI CLOUDINARY
+        // HAPUS GAMBAR DARI CLOUDINARY
         try {
             await cloudinary.uploader.destroy(itemToDelete.imagePublicId);
         } catch (cloudError) {
             console.error("Gagal menghapus aset Cloudinary (lanjut menghapus data):", cloudError);
         }
 
-        // 3. HAPUS DATA DARI MONGODB
+        // HAPUS DATA DARI MONGODB
         const deletedItem = await GalleryItem.findByIdAndDelete(itemId);
 
         return NextResponse.json({ success: true, data: deletedItem }, { status: 200 });
